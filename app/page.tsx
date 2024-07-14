@@ -18,6 +18,11 @@ export default function Home() {
             link: "#about",
             icon: <FaInfo />,
           },
+          {
+            name: "Articles",
+            link: "#articles",
+            icon: <FaInfo />,
+          },
         ]}
       />
       <Hero />

@@ -67,7 +67,7 @@ export const Highlight = ({
 }: {
   children: React.ReactNode;
   className?: string;
-  color: string;
+  color: "red" | "blue";
 }) => {
   return (
     <motion.span
@@ -88,7 +88,7 @@ export const Highlight = ({
         display: "inline",
       }}
       className={cn(
-        `relative inline-block pb-1   px-1 rounded-lg bg-gradient-to-r from-${color}-500 to-${color}-900`,
+        `relative inline-block pb-1   px-1 rounded-lg bg-gradient-to-r ${color === "red" ? "from-red-500 to-red-900" : "from-blue-500 to-blue-900"}`,
         className,
       )}
     >
