@@ -1,55 +1,9 @@
-import { Octokit } from "@octokit/rest";
 import matter from "gray-matter";
 import Link from "next/link";
 import { MDXRemote } from "next-mdx-remote/rsc";
 import { FaHome } from "react-icons/fa";
 import rehypeHighlight from "rehype-highlight";
-
-const octokit = new Octokit({ auth: process.env.GITHUB_TOKEN });
-
-async function getPostContent(slug: string) {
-  try {
-    const response = await octokit.repos.getContent({
-      owner: "mozaldy",
-      repo: "articles",
-      path: `posts/${slug}.mdx`,
-    });
-
-    if ("content" in response.data) {
-      const rawContent = Buffer.from(response.data.content, "base64").toString(
-        "utf-8",
-      );
-      const { data: frontMatter, content } = matter(rawContent);
-      return { frontMatter, content };
-    } else {
-      throw new Error("Content not found");
-    }
-  } catch (error) {
-    console.error("Error fetching post content:", error);
-    return null;
-  }
-}
-
-export async function generateStaticParams() {
-  try {
-    const { data } = await octokit.repos.getContent({
-      owner: "mozaldy",
-      repo: "articles",
-      path: "posts",
-    });
-
-    if (Array.isArray(data)) {
-      return data
-        .filter((file) => file.type === "file" && file.name.endsWith(".mdx"))
-        .map((file) => ({
-          slug: file.name.replace(/\.mdx$/, ""),
-        }));
-    }
-  } catch (error) {
-    console.error("Error generating static params:", error);
-  }
-  return [];
-}
+import { getPostContent } from "@/utils/mdx";
 
 export default async function Page({ params }: { params: { slug: string } }) {
   const { slug } = params;

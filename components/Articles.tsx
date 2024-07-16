@@ -8,7 +8,7 @@ export async function Articles() {
     description: post.frontMatters.excerpt || "No description available",
     date: post.frontMatters.date || "Unknown date",
     link: `/posts/${post.slug}`,
-    image: post.image || "/default-image.jpeg",
+    image: post.frontMatters.image || "/default-image.jpeg",
   }));
 
   return (

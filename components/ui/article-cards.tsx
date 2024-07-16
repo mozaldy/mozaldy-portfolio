@@ -23,7 +23,7 @@ export const ArticleCards = ({
   return (
     <div
       className={cn(
-        "grid grid-cols-1 md:grid-cols-2  lg:grid-cols-3",
+        " grid grid-cols-1 md:grid-cols-2  lg:grid-cols-3 justify-center justify-items-center place-items-center",
         className,
       )}
     >
@@ -52,7 +52,7 @@ export const ArticleCards = ({
               />
             )}
           </AnimatePresence>
-          <div className="max-w-xs w-full group/card">
+          <div className="w-full group/card">
             <div
               className={cn(
                 " cursor-pointer overflow-hidden relative card h-96 rounded-md shadow-xl  max-w-sm mx-auto backgroundImage flex flex-col justify-between p-4",
@@ -83,7 +83,7 @@ export const ArticleCards = ({
                   {item.title}
                 </h1>
                 <p className="flex align-center items-center font-normal text-sm text-gray-50 relative z-10 my-4">
-                  <FaCalendar className="mr-1" />{" "}
+                  <FaCalendar className="mr-1" />
                   {item.date.toLocaleDateString()}
                 </p>
               </div>
