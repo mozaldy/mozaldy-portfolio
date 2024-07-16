@@ -3,6 +3,7 @@ import matter from "gray-matter";
 
 const octokit = new Octokit({ auth: process.env.GITHUB_TOKEN });
 
+console.log(octokit.rest.rateLimit.get());
 interface GitHubContent {
   type: string;
   encoding: string;
