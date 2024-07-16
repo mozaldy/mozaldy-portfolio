@@ -1,30 +1,87 @@
-import fs from "fs";
-import path from "path";
+import { Octokit } from "@octokit/rest";
 import matter from "gray-matter";
 
-const postDir = path.join(process.cwd(), "posts");
+const octokit = new Octokit({ auth: process.env.GITHUB_TOKEN });
 
-export function getPostSlugs() {
-  return fs.readdirSync(postDir);
+interface GitHubContent {
+  type: string;
+  encoding: string;
+  size: number;
+  name: string;
+  path: string;
+  content: string;
+  sha: string;
+  url: string;
+  git_url: string;
+  html_url: string;
+  download_url: string;
 }
 
-export function getPostBySlug(slug: string) {
-  const fullPath = path.join(postDir, `${slug}`);
-  const fileContents = fs.readFileSync(fullPath, "utf8");
-  const { data, content } = matter(fileContents);
+export async function getAllPostsFromGitHub() {
+  try {
+    const { data } = await octokit.repos.getContent({
+      owner: "mozaldy",
+      repo: "articles",
+      path: "posts",
+    });
 
-  return { data, content };
-}
+    if (!Array.isArray(data)) {
+      throw new Error("No posts found or unexpected response format");
+    }
 
-export function getAllPosts(): { slug: string; frontMatters: any }[] {
-  const slugs = getPostSlugs();
+    const posts = await Promise.all(
+      data.map(async (file) => {
+        if (file.type !== "file" || !file.name.endsWith(".mdx")) {
+          console.warn(
+            `Skipping file ${file.name}: Invalid type or extension.`,
+          );
+          return null;
+        }
 
-  const posts = slugs.map((slug) => {
-    const { data } = getPostBySlug(slug);
-    return {
-      slug: slug.replace(/\.mdx/, ""),
-      frontMatters: data,
-    };
-  });
-  return posts;
+        try {
+          const response = await octokit.repos.getContent({
+            owner: "mozaldy",
+            repo: "articles",
+            path: file.path,
+          });
+
+          const fileContent = response.data as GitHubContent;
+
+          if (fileContent && fileContent.content) {
+            const rawContent = Buffer.from(
+              fileContent.content,
+              "base64",
+            ).toString("utf-8");
+            const { data: frontMatters, content: mdxContent } =
+              matter(rawContent);
+
+            let imageUrl = frontMatters.image as string;
+            if (imageUrl && !imageUrl.startsWith("http")) {
+              imageUrl = `https://raw.githubusercontent.com/mozaldy/articles/main${imageUrl}`;
+            }
+
+            return {
+              slug: file.name.replace(".mdx", ""),
+              frontMatters: {
+                ...frontMatters,
+              },
+              image: imageUrl,
+              content: mdxContent,
+            };
+          }
+        } catch (error) {
+          console.error(`Error processing file ${file.name}:`, error);
+        }
+
+        return null;
+      }),
+    );
+
+    return posts.filter(
+      (post): post is NonNullable<typeof post> => post !== null,
+    );
+  } catch (error) {
+    console.error("Error fetching posts:", error);
+    return [];
+  }
 }

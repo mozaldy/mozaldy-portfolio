@@ -1,5 +1,5 @@
-import { Articles } from "@/components/articles";
-import Hero from "@/components/hero";
+import { Articles } from "@/components/Articles";
+import Hero from "@/components/Hero";
 import { FloatingNav } from "@/components/ui/floating-navbar";
 import { FaHome, FaInfo } from "react-icons/fa";
 
